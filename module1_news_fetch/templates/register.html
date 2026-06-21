@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+
+    <style>
+        body{
+            background:#f4f6f9;
+            font-family:Arial,sans-serif;
+        }
+
+        .container{
+            width:400px;
+            margin:80px auto;
+            background:white;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 4px 15px rgba(0,0,0,.1);
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        input, select{
+            width:100%;
+            padding:12px;
+            margin:10px 0;
+            border:1px solid #ddd;
+            border-radius:6px;
+            box-sizing:border-box;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            background:#007bff;
+            color:white;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            margin-top:10px;
+        }
+
+        button:hover{
+            background:#0056b3;
+        }
+
+        .link{
+            text-align:center;
+            margin-top:15px;
+        }
+
+        label{
+            font-weight:bold;
+            display:block;
+            margin-top:10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Create Account</h2>
+
+    {% if message %}
+    <p style="color:red;text-align:center;">
+        {{ message }}
+    </p>
+    {% endif %}
+
+    <form method="POST">
+
+        <input
+            type="text"
+            name="username"
+            placeholder="Gmail Address"
+            required
+        >
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+        >
+
+        <input
+            type="password"
+            name="confirm_password"
+            placeholder="Confirm Password"
+            required
+        >
+
+        <label>Select Interest</label>
+        <select name="interest" required>
+            <option value="">Choose Interest</option>
+
+            <option value="technology">Technology</option>
+            <option value="ai">AI</option>
+            <option value="cybersecurity">Cybersecurity</option>
+            <option value="data science">Data Science</option>
+            <option value="cloud computing">Cloud Computing</option>
+
+            <option value="business">Business</option>
+            <option value="startups">Startups</option>
+            <option value="stock market">Stock Market</option>
+            <option value="economy">Economy</option>
+            <option value="banking">Banking</option>
+
+            <option value="sports">Sports</option>
+            <option value="cricket">Cricket</option>
+            <option value="football">Football</option>
+            <option value="tennis">Tennis</option>
+
+            <option value="health">Health</option>
+            <option value="fitness">Fitness</option>
+            <option value="nutrition">Nutrition</option>
+            <option value="mental health">Mental Health</option>
+
+            <option value="entertainment">Entertainment</option>
+            <option value="movies">Movies</option>
+            <option value="music">Music</option>
+            <option value="celebrities">Celebrities</option>
+
+            <option value="science">Science</option>
+            <option value="space">Space</option>
+            <option value="environment">Environment</option>
+
+            <option value="politics">Politics</option>
+            <option value="government policy">Government Policy</option>
+            <option value="political parties">Political Parties</option>
+            <option value="elections">Elections</option>
+        </select>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="link">
+        Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+    </div>
+
+</div>
+
+</body>
+</html>

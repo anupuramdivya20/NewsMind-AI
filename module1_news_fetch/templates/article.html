@@ -1,0 +1,99 @@
+{% include 'navbar.html' %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Article</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body{
+            background:#f4f6f9;
+            font-family:Arial, sans-serif;
+            margin:0;
+            padding:0;
+        }
+
+        .article-container{
+            max-width:900px;
+            margin:40px auto;
+            background:white;
+            padding:30px;
+            border-radius:14px;
+            box-shadow:0 4px 16px rgba(0,0,0,.12);
+            text-align:center;
+        }
+
+        .article-title{
+            font-size:28px;
+            font-weight:bold;
+            color:#222;
+            margin-bottom:20px;
+            line-height:1.4;
+        }
+
+        .article-source{
+            color:#666;
+            font-size:16px;
+            margin-bottom:30px;
+        }
+
+        .btn-group{
+            display:flex;
+            justify-content:center;
+            gap:15px;
+            flex-wrap:wrap;
+            margin-top:20px;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:12px 20px;
+            border:none;
+            border-radius:8px;
+            text-decoration:none;
+            color:white;
+            font-size:15px;
+            cursor:pointer;
+        }
+
+        .home-btn{
+            background:#007bff;
+        }
+
+        .read-btn{
+            background:#ff512f;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="article-container">
+
+    <div class="article-title">
+        {{ title }}
+    </div>
+
+    <div class="article-source">
+        Source: {{ source }}
+    </div>
+
+    <div class="btn-group">
+        {% if session.get('user') %}
+            <a href="{{ url_for('home') }}" class="btn home-btn">⬅ Back to Home</a>
+        {% else %}
+            <a href="{{ url_for('guest') }}" class="btn home-btn">⬅ Back to Home</a>
+        {% endif %}
+
+        {% if article_url %}
+            <a href="{{ article_url }}" target="_blank" class="btn read-btn">
+                Open Original Article
+            </a>
+        {% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>

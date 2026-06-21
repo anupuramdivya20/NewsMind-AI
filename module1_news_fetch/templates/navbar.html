@@ -1,0 +1,128 @@
+<style>
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 25px;
+    background: rgba(17, 17, 17, 0.9);
+    backdrop-filter: blur(10px);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #ff6f61;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.nav-links a:hover {
+    background: #ff6f61;
+    transform: translateY(-2px);
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 35px;
+    background: black;
+    color: white;
+    min-width: 180px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 10px;
+    color: white;
+}
+
+.dropdown-content a:hover {
+    background: #333;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.auth-btn {
+    background: #ff6f61;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        position: absolute;
+        right: 10px;
+        top: 60px;
+        background: #1f1f2e;
+        padding: 10px;
+        border-radius: 10px;
+    }
+}
+</style>
+
+<div class="navbar">
+
+    <div class="logo">📰 AI Powered News Digest Agent</div>
+
+    <div class="nav-links">
+
+        <!-- Home dynamic -->
+        <a href="{% if session.get('user') %}{{ url_for('home') }}{% else %}{{ url_for('guest') }}{% endif %}">
+            Home
+        </a>
+
+        <!-- Explore Dropdown -->
+        <div class="dropdown">
+            <a href="#">Explore ▼</a>
+            <div class="dropdown-content">
+                <a href="{% if session.get('user') %}{{ url_for('home', category='technology') }}{% else %}{{ url_for('guest', category='technology') }}{% endif %}">Technology</a>
+                <a href="{% if session.get('user') %}{{ url_for('home', category='sports') }}{% else %}{{ url_for('guest', category='sports') }}{% endif %}">Sports</a>
+                <a href="{% if session.get('user') %}{{ url_for('home', category='business') }}{% else %}{{ url_for('guest', category='business') }}{% endif %}">Business</a>
+                <a href="{% if session.get('user') %}{{ url_for('home', category='health') }}{% else %}{{ url_for('guest', category='health') }}{% endif %}">Health</a>
+                <a href="{% if session.get('user') %}{{ url_for('home', category='science') }}{% else %}{{ url_for('guest', category='science') }}{% endif %}">Science</a>
+            </div>
+        </div>
+
+        <a href="{{ url_for('trending') }}">Trending</a>
+
+        {% if session.get('user') %}
+            <a href="{{ url_for('bookmarks') }}">Bookmarks</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="auth-btn">Login</a>
+            <a href="{{ url_for('register') }}" class="auth-btn">Register</a>
+        {% endif %}
+
+    </div>
+
+</div>

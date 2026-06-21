@@ -1,0 +1,160 @@
+{% include 'navbar.html' %}
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Trending News</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+body{
+    background:#f4f6f9;
+    font-family:Arial,sans-serif;
+}
+
+.hero{
+    background:linear-gradient(135deg,#ff512f,#dd2476);
+    color:white;
+    text-align:center;
+    padding:50px;
+}
+
+.hero h1{
+    margin:0;
+    font-size:40px;
+}
+
+.top-actions{
+    text-align:center;
+    margin:20px 0;
+}
+
+.home-btn{
+    background:#007bff;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    text-decoration:none;
+}
+
+.news-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:25px;
+    padding:25px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+}
+
+.news-image{
+    width:100%;
+    height:230px;
+    object-fit:cover;
+}
+
+.content{
+    padding:15px;
+}
+
+.title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.source{
+    color:#777;
+    margin-bottom:10px;
+}
+
+.summary{
+    color:#444;
+    line-height:1.5;
+}
+
+.read-btn{
+    background:#ff512f;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:15px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="hero">
+    <h1>🔥 Trending News</h1>
+    <p>Most Popular News Stories Right Now</p>
+</div>
+
+<div class="top-actions">
+    {% if session.get('user') %}
+        <a href="{{ url_for('home') }}" class="home-btn">⬅ Back to Home</a>
+    {% else %}
+        <a href="{{ url_for('guest') }}" class="home-btn">⬅ Back to Home</a>
+    {% endif %}
+</div>
+
+<div class="news-grid">
+
+{% for item in news %}
+
+<div class="card">
+
+    {% if item.image %}
+        <img src="{{ item.image }}" class="news-image">
+    {% else %}
+        <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c"
+             class="news-image">
+    {% endif %}
+
+    <div class="content">
+
+        <div class="title">
+            {{ item.title }}
+        </div>
+
+        <div class="source">
+            {{ item.source }}
+        </div>
+
+        <div class="summary">
+            {{ item.summary }}
+        </div>
+
+        <a href="{{ url_for('article_page') }}?title={{ item.title|urlencode }}&source={{ item.source|urlencode }}&url={{ item.url|urlencode }}">
+            <button class="read-btn">
+                Read Full Article
+            </button>
+        </a>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

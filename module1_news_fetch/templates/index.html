@@ -1,0 +1,237 @@
+{% include 'navbar.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Powered News Digest Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script>
+        let currentAudio = null;
+
+        // =========================
+        // TOGGLE SUMMARY
+        // =========================
+        function toggleSummary(id, btn) {
+            let x = document.getElementById(id);
+
+            if (x.style.display === "none" || x.style.display === "") {
+                x.style.display = "block";
+                btn.innerText = "Hide Summary";
+            } else {
+                x.style.display = "none";
+                btn.innerText = "Show Summary";
+            }
+        }
+
+        // =========================
+        // STOP SPEECH
+        // =========================
+        function stopSpeech() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // =========================
+        // SPEAK SUMMARY
+        // =========================
+        function speakSummary(id) {
+            let element = document.getElementById(id);
+            if (!element) return;
+
+            let text = element.innerText.trim();
+            if (!text) return;
+
+            stopSpeech();
+
+            let lang = document.getElementById("language").value || "en";
+
+            fetch(`{{ url_for('voice') }}?text=${encodeURIComponent(text)}&lang=${lang}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.audio) {
+                        currentAudio = new Audio(data.audio);
+                        currentAudio.play();
+                    } else {
+                        alert("Voice error");
+                    }
+                })
+                .catch(() => alert("Voice failed"));
+        }
+
+        // =========================
+        // SUBCATEGORY UPDATE
+        // =========================
+        function updateSubcategories() {
+            let category = document.getElementById("category").value;
+            let sub = document.getElementById("subcategory");
+
+            let options = {
+                technology: ["AI", "Cloud Computing", "Cybersecurity", "Data Science", "Blockchain"],
+                business: ["Startups", "Stock Market", "Economy", "Banking"],
+                sports: ["Cricket", "Football", "Tennis"],
+                health: ["Fitness", "Nutrition", "Mental Health"],
+                entertainment: ["Movies", "Music", "Celebrities"],
+                science: ["Space", "Environment"],
+                politics: [
+                    "Elections",
+                    "Government Policy",
+                    "Parliament",
+                    "International Relations",
+                    "Public Issues",
+                    "Political Parties"
+                ]
+            };
+
+            sub.innerHTML = "";
+
+            let defaultOpt = document.createElement("option");
+            defaultOpt.value = "";
+            defaultOpt.text = "Subcategory";
+            sub.appendChild(defaultOpt);
+
+            if (options[category]) {
+                options[category].forEach(item => {
+                    let opt = document.createElement("option");
+                    opt.value = item;
+                    opt.text = item;
+                    sub.appendChild(opt);
+                });
+            }
+
+            let selectedSub = "{{ subcategory|default('') }}";
+            if (selectedSub) {
+                sub.value = selectedSub;
+            }
+        }
+
+        // =========================
+        // INIT
+        // =========================
+        window.onload = function () {
+            updateSubcategories();
+
+            let selectedSub = "{{ subcategory|default('') }}";
+            if (selectedSub) {
+                document.getElementById("subcategory").value = selectedSub;
+            }
+        };
+    </script>
+</head>
+
+<body>
+
+    <div class="header">
+        <p>Welcome <b>{{ user }}</b></p>
+
+        <form method="GET" action="{% if user == 'Guest' %}{{ url_for('guest') }}{% else %}{{ url_for('home') }}{% endif %}">
+            
+            <select name="category" id="category" onchange="updateSubcategories()">
+                <option value="" {% if category=="" %}selected{% endif %}>Category</option>
+                <option value="technology" {% if category=="technology" %}selected{% endif %}>Technology</option>
+                <option value="business" {% if category=="business" %}selected{% endif %}>Business</option>
+                <option value="sports" {% if category=="sports" %}selected{% endif %}>Sports</option>
+                <option value="health" {% if category=="health" %}selected{% endif %}>Health</option>
+                <option value="entertainment" {% if category=="entertainment" %}selected{% endif %}>Entertainment</option>
+                <option value="science" {% if category=="science" %}selected{% endif %}>Science</option>
+                <option value="politics" {% if category=="politics" %}selected{% endif %}>Politics</option>
+            </select>
+
+            <select name="subcategory" id="subcategory"></select>
+
+            <input type="text" name="query" placeholder="Search News..." value="{{ search|default('') }}">
+
+            <select name="location" id="location">
+                <option value="world" {% if location=="world" %}selected{% endif %}>World</option>
+                <option value="india" {% if location=="india" %}selected{% endif %}>India</option>
+                <option value="telangana" {% if location=="telangana" %}selected{% endif %}>Telangana</option>
+            </select>
+
+            <select name="language" id="language">
+                <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                <option value="hi" {% if language=="hi" %}selected{% endif %}>Hindi</option>
+                <option value="te" {% if language=="te" %}selected{% endif %}>Telugu</option>
+            </select>
+
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="container">
+
+        {% if news|length == 0 %}
+            <h3 style="text-align:center;">No News Available</h3>
+        {% endif %}
+
+        {% for item in news %}
+        <div class="card">
+
+            {% if item.image %}
+                <img src="{{ item.image }}" class="news-image" alt="News Image">
+            {% endif %}
+
+            <div class="title">{{ item.title }}</div>
+
+            <div class="source">Source: {{ item.source }}</div>
+
+            <!-- SENTIMENT -->
+            <div class="sentiment">
+                {% if item.sentiment == "positive" %}
+                    🟢 Positive
+                {% elif item.sentiment == "negative" %}
+                    🔴 Negative
+                {% else %}
+                    🟡 Neutral
+                {% endif %}
+            </div>
+
+            <!-- WHY RECOMMENDED -->
+            <div class="reason">
+                <b>Why Recommended:</b> {{ item.reason }}
+            </div>
+
+            <!-- BUTTONS -->
+            <div style="margin-top:12px;">
+                <button onclick="toggleSummary('s{{ loop.index }}', this)">
+                    Show Summary
+                </button>
+
+                <button onclick="speakSummary('s{{ loop.index }}')">
+                    🔊 Listen Summary
+                </button>
+
+                <button onclick="stopSpeech()">
+                    ⏹ Stop
+                </button>
+            </div>
+
+            <!-- SUMMARY -->
+            <div id="s{{ loop.index }}" class="summary" style="display:none; margin-top:12px;">
+                {{ item.summary }}
+            </div>
+
+            <!-- READ FULL ARTICLE -->
+            <div style="margin-top:15px;">
+                <a href="{{ url_for('track') }}?title={{ item.title|urlencode }}&category={{ category|default('')|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('Unknown')|urlencode }}">
+                    <button>Read Full Article</button>
+                </a>
+
+                {% if user != "Guest" %}
+                <a href="{{ url_for('bookmark') }}?title={{ item.title|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('')|urlencode }}">
+                    <button>⭐ Save</button>
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</body>
+</html>
