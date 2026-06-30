@@ -24,6 +24,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .nav-links a {
@@ -77,6 +78,38 @@
     font-weight: bold;
 }
 
+/* SEARCH BAR */
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 10px;
+}
+
+.search-form input {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    width: 220px;
+    font-size: 14px;
+}
+
+.search-form button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    background: #ff6f61;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.search-form button:hover {
+    background: #e65b50;
+}
+
 @media (max-width: 768px) {
     .nav-links {
         flex-direction: column;
@@ -86,32 +119,45 @@
         background: #1f1f2e;
         padding: 10px;
         border-radius: 10px;
+        width: 90%;
+    }
+
+    .search-form {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .search-form input {
+        width: 100%;
     }
 }
 </style>
 
 <div class="navbar">
 
-    <div class="logo">📰 AI Powered News Digest Agent</div>
+    <div class="logo">AI Powered News Digest Agent</div>
 
     <div class="nav-links">
+
+        <!-- SEARCH BAR -->
+        <form 
+            class="search-form"
+            method="GET"
+            action="{% if session.get('user') %}{{ url_for('home') }}{% else %}{{ url_for('guest') }}{% endif %}"
+        >
+            <input 
+                type="text" 
+                name="query" 
+                placeholder="Search news..." 
+                value="{{ request.args.get('query', '') }}"
+            >
+            <button type="submit">Search</button>
+        </form>
 
         <!-- Home dynamic -->
         <a href="{% if session.get('user') %}{{ url_for('home') }}{% else %}{{ url_for('guest') }}{% endif %}">
             Home
         </a>
-
-        <!-- Explore Dropdown -->
-        <div class="dropdown">
-            <a href="#">Explore ▼</a>
-            <div class="dropdown-content">
-                <a href="{% if session.get('user') %}{{ url_for('home', category='technology') }}{% else %}{{ url_for('guest', category='technology') }}{% endif %}">Technology</a>
-                <a href="{% if session.get('user') %}{{ url_for('home', category='sports') }}{% else %}{{ url_for('guest', category='sports') }}{% endif %}">Sports</a>
-                <a href="{% if session.get('user') %}{{ url_for('home', category='business') }}{% else %}{{ url_for('guest', category='business') }}{% endif %}">Business</a>
-                <a href="{% if session.get('user') %}{{ url_for('home', category='health') }}{% else %}{{ url_for('guest', category='health') }}{% endif %}">Health</a>
-                <a href="{% if session.get('user') %}{{ url_for('home', category='science') }}{% else %}{{ url_for('guest', category='science') }}{% endif %}">Science</a>
-            </div>
-        </div>
 
         <a href="{{ url_for('trending') }}">Trending</a>
 

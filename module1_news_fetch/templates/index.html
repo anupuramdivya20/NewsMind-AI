@@ -88,6 +88,8 @@
                 ]
             };
 
+            let selectedSub = "{{ subcategory|default('') }}";
+
             sub.innerHTML = "";
 
             let defaultOpt = document.createElement("option");
@@ -104,9 +106,10 @@
                 });
             }
 
-            let selectedSub = "{{ subcategory|default('') }}";
-            if (selectedSub) {
+            if (selectedSub && options[category] && options[category].includes(selectedSub)) {
                 sub.value = selectedSub;
+            } else {
+                sub.value = "";
             }
         }
 
@@ -115,11 +118,6 @@
         // =========================
         window.onload = function () {
             updateSubcategories();
-
-            let selectedSub = "{{ subcategory|default('') }}";
-            if (selectedSub) {
-                document.getElementById("subcategory").value = selectedSub;
-            }
         };
     </script>
 </head>
@@ -137,18 +135,15 @@
                 <option value="business" {% if category=="business" %}selected{% endif %}>Business</option>
                 <option value="sports" {% if category=="sports" %}selected{% endif %}>Sports</option>
                 <option value="health" {% if category=="health" %}selected{% endif %}>Health</option>
-                <option value="entertainment" {% if category=="entertainment" %}selected{% endif %}>Entertainment</option>
-                <option value="science" {% if category=="science" %}selected{% endif %}>Science</option>
                 <option value="politics" {% if category=="politics" %}selected{% endif %}>Politics</option>
+                <option value="other">Other</option>
             </select>
 
             <select name="subcategory" id="subcategory"></select>
 
-            <input type="text" name="query" placeholder="Search News..." value="{{ search|default('') }}">
-
             <select name="location" id="location">
                 <option value="world" {% if location=="world" %}selected{% endif %}>World</option>
-                <option value="india" {% if location=="india" %}selected{% endif %}>India</option>
+                <option value="india" {% if location=="india" or not location %}selected{% endif %}>India</option>
                 <option value="telangana" {% if location=="telangana" %}selected{% endif %}>Telangana</option>
             </select>
 
@@ -171,60 +166,41 @@
         {% for item in news %}
         <div class="card">
 
-            {% if item.image %}
-                <img src="{{ item.image }}" class="news-image" alt="News Image">
-            {% endif %}
-
             <div class="title">{{ item.title }}</div>
 
             <div class="source">Source: {{ item.source }}</div>
 
-            <!-- SENTIMENT -->
-            <div class="sentiment">
-                {% if item.sentiment == "positive" %}
-                    🟢 Positive
-                {% elif item.sentiment == "negative" %}
-                    🔴 Negative
-                {% else %}
-                    🟡 Neutral
-                {% endif %}
-            </div>
+            <div class="action-row">
+    <button class="summary-btn" onclick="toggleSummary('s{{ loop.index }}', this)">
+        Show Summary
+    </button>
 
-            <!-- WHY RECOMMENDED -->
-            <div class="reason">
-                <b>Why Recommended:</b> {{ item.reason }}
-            </div>
+    <button class="voice-btn" onclick="speakSummary('s{{ loop.index }}')">
+        🔊
+    </button>
 
-            <!-- BUTTONS -->
-            <div style="margin-top:12px;">
-                <button onclick="toggleSummary('s{{ loop.index }}', this)">
-                    Show Summary
-                </button>
+    <button class="stop-btn" onclick="stopSpeech()">
+        ⏹
+    </button>
+</div>
 
-                <button onclick="speakSummary('s{{ loop.index }}')">
-                    🔊 Listen Summary
-                </button>
-
-                <button onclick="stopSpeech()">
-                    ⏹ Stop
-                </button>
-            </div>
-
-            <!-- SUMMARY -->
             <div id="s{{ loop.index }}" class="summary" style="display:none; margin-top:12px;">
                 {{ item.summary }}
             </div>
 
-            <!-- READ FULL ARTICLE -->
-            <div style="margin-top:15px;">
-                <a href="{{ url_for('track') }}?title={{ item.title|urlencode }}&category={{ category|default('')|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('Unknown')|urlencode }}">
-                    <button>Read Full Article</button>
-                </a>
+            <div class="article-btn-row">
+                {% if user == "Guest" %}
+                    <a href="{{ url_for('article_page') }}?title={{ item.title|urlencode }}&source={{ item.source|default('Unknown')|urlencode }}&url={{ item.url|urlencode }}">
+                        <button>Read Full Article</button>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('track') }}?title={{ item.title|urlencode }}&category={{ category|default('')|urlencode }}&subcategory={{ subcategory|default('')|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('Unknown')|urlencode }}">
+                        <button>Read Full Article</button>
+                    </a>
 
-                {% if user != "Guest" %}
-                <a href="{{ url_for('bookmark') }}?title={{ item.title|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('')|urlencode }}">
-                    <button>⭐ Save</button>
-                </a>
+                    <a href="{{ url_for('bookmark') }}?title={{ item.title|urlencode }}&url={{ item.url|urlencode }}&source={{ item.source|default('')|urlencode }}">
+                        <button>⭐ Save</button>
+                    </a>
                 {% endif %}
             </div>
 

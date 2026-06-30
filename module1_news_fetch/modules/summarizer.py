@@ -16,7 +16,7 @@ except:
 # =========================
 # CORE SUMMARIZER (MTECH UPGRADE)
 # =========================
-def summarize(text, max_sentences=2):
+def summarize(text, max_sentences=7):
 
     if not text or len(text.strip()) == 0:
         return "No summary available"
@@ -47,7 +47,7 @@ def summarize(text, max_sentences=2):
             if word in word_freq:
                 sentence_score[sentence] = sentence_score.get(sentence, 0) + word_freq[word]
 
-    # Normalize sentence scores (M.Tech improvement)
+    # Normalize sentence scores
     max_score = max(sentence_score.values()) if sentence_score else 1
 
     for key in sentence_score:
@@ -62,10 +62,14 @@ def summarize(text, max_sentences=2):
         reverse=True
     )
 
-    summary = " ".join(ranked_sentences[:max_sentences])
+    # Keep original article order instead of score order
+    selected = ranked_sentences[:max_sentences]
+
+    selected = sorted(selected, key=lambda s: sentences.index(s))
+
+    summary = " ".join(selected)
 
     return summary
-
 
 # =========================
 # ROUGE EVALUATION HOOK (MTECH THESIS READY)

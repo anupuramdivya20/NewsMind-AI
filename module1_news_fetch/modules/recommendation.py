@@ -26,6 +26,7 @@ def init_recommendation_db():
 
 init_recommendation_db()
 
+
 def update_interest(username, interest):
     if not username or username == "Guest" or not interest:
         return
@@ -35,13 +36,17 @@ def update_interest(username, interest):
     conn = sqlite3.connect("news.db")
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT 1 FROM user_interests WHERE username=? AND lower(interest)=?",
-        (username, interest)
-    )
-    exists = cur.fetchone()
+    # Prevent immediate duplicate spam of same latest interest
+    cur.execute("""
+        SELECT interest
+        FROM user_interests
+        WHERE username=?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (username,))
+    last_row = cur.fetchone()
 
-    if not exists:
+    if not last_row or (last_row[0] or "").strip().lower() != interest:
         cur.execute(
             "INSERT INTO user_interests(username, interest) VALUES(?, ?)",
             (username, interest)
@@ -49,6 +54,7 @@ def update_interest(username, interest):
         conn.commit()
 
     conn.close()
+
 
 def get_user_profile(username):
     if not username or username == "Guest":
@@ -67,6 +73,43 @@ def get_user_profile(username):
     conn.close()
     return data
 
+
+def get_recent_user_interests(username, limit=3):
+    """
+    Returns most recent unique interests for the user.
+    Example output: ['ai', 'cricket', 'business']
+    """
+    if not username or username == "Guest":
+        return []
+
+    conn = sqlite3.connect("news.db")
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT interest
+        FROM user_interests
+        WHERE username=?
+        ORDER BY id DESC
+    """, (username,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    recent = []
+    seen = set()
+
+    for row in rows:
+        interest = (row[0] or "").strip().lower()
+        if interest and interest not in seen:
+            recent.append(interest)
+            seen.add(interest)
+
+        if len(recent) >= limit:
+            break
+
+    return recent
+
+
 def track_article(username, title, category):
     if not username or username == "Guest":
         return
@@ -81,6 +124,7 @@ def track_article(username, title, category):
 
     conn.commit()
     conn.close()
+
 
 def get_popularity_score(title):
     if not title:
